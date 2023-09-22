@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2014, Majenko Technologies & 2023, VitanovG
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -26,42 +26,70 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ *  SoftSPI.h - Software SPI (bit-banging) library that enables the use of all
+ *              digital pins as SoftSPI pins.
+ *
+ *  Supports: 8 bit simultaneous read-write operation in any SPI_MODE(0-4)
+ *            with LSBFIRST and MSBFRIST bit orders. 
+ *
+ *	Intended use: with a Teensy 4.1 microcontroller 
+ *                (Possible to use with Arduino using wait() function)
+ *
+ *  Updated by: VitanovG on Sept. 22. 2023
  */
-
-
 #ifndef _SOFTSPI_H
 #define _SOFTSPI_H
 
-#if (ARDUINO >= 100) 
-# include <Arduino.h>
-#else
-# include <WProgram.h>
-#endif
-
 #include <SPI.h>
 
-class SoftSPI : public SPIClass {
-    private:
-        void wait(uint_fast8_t del);
+struct SoftSPISettings
+{
+	// Variables (public)
+	uint32_t clock;
+	uint8_t bitOrder;
+	uint8_t dataMode;
+	
+	// Default constructor
+	SoftSPISettings()
+	{
+		clock = 4000000; // 4Mhz
+		bitOrder = MSBFIRST;
+		datamode = SPI_MODE0;
+	}
+	
+	// Parameterized constructor
+	/* bitord - MSBFIRST/LSBFIRST; datamd - SPI_MODE0/1/2/3 */
+	SoftSPISettings(uint32_t clk, uint8_t bitord, uint8_t datamd)
+	{
+		clock = clk;
+		bitOrder = bitord;
+		datamode = datamd;
+	}
+}
 
+class SoftSPI : public SPIClass 
+{
     private:
-        uint8_t _cke;
-        uint8_t _ckp;
-        uint8_t _delay;
+		uint8_t _mosi;
         uint8_t _miso;
-        uint8_t _mosi;
-        uint8_t _sck;
+        uint8_t _sclk;
+		uint8_t _sync;
+		uint8_t _ckp;
+		uint8_t _cke;
         uint8_t _order;
+		uint32_t _delay;
+		
+		//void wait(uint_fast8_t del);
 
     public:
-        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sck);
-        void begin();
-        void end();
+        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync);
+        void beginTransaction(SoftSPISettings settings);
+        void endTransaction();
         void setBitOrder(uint8_t);
         void setDataMode(uint8_t);
-        void setClockDivider(uint32_t);
-        uint8_t transfer(uint8_t);
-		uint16_t transfer16(uint16_t data);
-		
+        void setFreq(uint32_t);
+        uint8_t transfer(uint8_t);		
 };
 #endif
