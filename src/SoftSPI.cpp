@@ -97,10 +97,10 @@ void SoftSPI::beginTransaction(SoftSPISettings settings)
     pinMode(_mosi, OUTPUT);
     pinMode(_miso, INPUT);
     pinMode(_sclk, OUTPUT);
-	pinMode(_sync, OUTPUT);
+	//pinMode(_sync, OUTPUT);
 	
 	this->setFreq(settings.clock);
-	this->setBitOrder(setting.bitOrder);
+	this->setBitOrder(settings.bitOrder);
 	this->setDataMode(settings.dataMode);
 }
 
@@ -112,7 +112,7 @@ void SoftSPI::endTransaction()
     pinMode(_mosi, INPUT);
     pinMode(_miso, INPUT);
     pinMode(_sclk, INPUT);
-	pinMode(_sync, INPUT);
+	//pinMode(_sync, INPUT);
 }
 
 /***************************************************************************//**
@@ -193,6 +193,7 @@ uint8_t SoftSPI::transfer(uint8_t cmd)
         delayNanoseconds(del);
         if (!_cke) { sclk ^= 1; digitalWriteFast(_sclk, sclk); }
     }
+	digitalWriteFast(_mosi, LOW);
 	if (_order == LSBFIRST) { out = swap_order(out); }
     return out;
 }

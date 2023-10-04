@@ -56,7 +56,7 @@ struct SoftSPISettings
 	{
 		clock = 4000000; // 4Mhz
 		bitOrder = MSBFIRST;
-		datamode = SPI_MODE0;
+		dataMode = SPI_MODE0;
 	}
 	
 	// Parameterized constructor
@@ -65,12 +65,24 @@ struct SoftSPISettings
 	{
 		clock = clk;
 		bitOrder = bitord;
-		datamode = datamd;
+		dataMode = datamd;
 	}
-}
+};
 
-class SoftSPI : public SPIClass 
+//: public SPIClass 
+
+class SoftSPI
 {
+	public:
+        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync);
+        void beginTransaction();
+		void beginTransaction(SoftSPISettings settings);
+        void endTransaction();
+        void setBitOrder(uint8_t);
+        void setDataMode(uint8_t);
+        void setFreq(uint32_t);
+        uint8_t transfer(uint8_t);	
+		
     private:
 		uint8_t _mosi;
         uint8_t _miso;
@@ -82,14 +94,5 @@ class SoftSPI : public SPIClass
 		uint32_t _delay;
 		
 		//void wait(uint_fast8_t del);
-
-    public:
-        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync);
-        void beginTransaction(SoftSPISettings settings);
-        void endTransaction();
-        void setBitOrder(uint8_t);
-        void setDataMode(uint8_t);
-        void setFreq(uint32_t);
-        uint8_t transfer(uint8_t);		
 };
 #endif
