@@ -74,14 +74,16 @@ struct SoftSPISettings
 class SoftSPI
 {
 	public:
-        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync);
+		SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync): SoftSPI(mosi, miso, sclk, sync, _SSPI_default_settings) {} //delegation
+        SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync, SoftSPISettings settings);
         void beginTransaction();
 		void beginTransaction(SoftSPISettings settings);
         void endTransaction();
         void setBitOrder(uint8_t);
         void setDataMode(uint8_t);
         void setFreq(uint32_t);
-        uint8_t transfer(uint8_t);	
+        uint8_t transfer(uint8_t);
+		void send(uint8_t);
 		
     private:
 		uint8_t _mosi;
@@ -92,6 +94,8 @@ class SoftSPI
 		uint8_t _cke;
         uint8_t _order;
 		uint32_t _delay;
+		SoftSPISettings _SSPI_default_settings;
+		SoftSPISettings _SSPIsettings;
 		
 		//void wait(uint_fast8_t del);
 };

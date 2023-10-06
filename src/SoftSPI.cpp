@@ -62,30 +62,30 @@ uint8_t swap_order(uint8_t val)
 
 // ----------------------- Class Functions ------------------------
 /***************************************************************************//**
-* @brief Constructor for SoftSPI class
+* @brief Constructor for SoftSPI class (necessary for SSPI_Send)
 *
 * @param inputs should all be valid digital pins
 *******************************************************************************/
-SoftSPI::SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync) 
+SoftSPI::SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync, SoftSPISettings settings) 
 {
     _mosi = mosi;	// Master Out Slave In
     _miso = miso;	// Master In Slave Out
     _sclk = sclk;	// Serial Clock signal
 	_sync = sync;	// Chip enable
     _delay = 250;	// 10^9/250 =~ 4Mhz SPI freq.	
+	_SSPIsettings = settings; //speed, data_bit_ordering
+	
 	_ckp = 0;		// Clock Polarity (Clock LOW-0 or HIGH-1 when idle?)
     _cke = 0;		// Clock Phase (Data read on Falling-0 or Rising-1 edge?)
     _order = MSBFIRST; // Data bit ordering
 }
-
 
 /***************************************************************************//**
 * @brief Uses default settings for beginTransaction()			
 *******************************************************************************/
 void SoftSPI::beginTransaction()
 {
-	SoftSPISettings default_settings;
-	this->beginTransaction(default_settings);
+	this->beginTransaction(this->_SSPIsettings);
 }
 
 /***************************************************************************//**
@@ -196,4 +196,21 @@ uint8_t SoftSPI::transfer(uint8_t cmd)
 	digitalWriteFast(_mosi, LOW);
 	if (_order == LSBFIRST) { out = swap_order(out); }
     return out;
+}
+
+/***************************************************************************//**
+* @brief Sends SSPI commands, and reads MISO (SYNC -> L, transfer(), SYNC->H)
+*        Written for use with RPL9201PWPR Low side swith (4Mhz)
+*
+* @param cmd - 1 Byte uint8_t val
+*******************************************************************************/
+void SoftSPI::send(uint8_t cmd)
+{ 
+	digitalWriteFast(this->_sync, LOW);	// Activate Sync (input reg.)
+	this->beginTransaction(this->_SSPIsettings);
+	delayNanoseconds(100);				// wait (~SYNC LOW -> SCLK edge)
+	this->transfer(cmd);            		// Send 8 bits
+	this->endTransaction();
+	delayNanoseconds(100);
+	digitalWriteFast(this->_sync, HIGH);	// Update input reg. (Rising Edge)
 }
