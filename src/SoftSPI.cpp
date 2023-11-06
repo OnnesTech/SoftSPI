@@ -97,7 +97,7 @@ void SoftSPI::beginTransaction(SoftSPISettings settings)
     pinMode(_mosi, OUTPUT);
     pinMode(_miso, INPUT);
     pinMode(_sclk, OUTPUT);
-	//pinMode(_sync, OUTPUT);
+	pinMode(_sync, OUTPUT);
 	
 	this->setFreq(settings.clock);
 	this->setBitOrder(settings.bitOrder);
@@ -112,7 +112,7 @@ void SoftSPI::endTransaction()
     pinMode(_mosi, INPUT);
     pinMode(_miso, INPUT);
     pinMode(_sclk, INPUT);
-	//pinMode(_sync, INPUT);
+	pinMode(_sync, INPUT);
 }
 
 /***************************************************************************//**
@@ -206,9 +206,9 @@ uint8_t SoftSPI::transfer(uint8_t cmd)
 *******************************************************************************/
 void SoftSPI::send(uint8_t cmd)
 { 
-	digitalWriteFast(this->_sync, LOW);	// Activate Sync (input reg.)
+	digitalWriteFast(this->_sync, LOW);		// Activate Sync (input reg.)
 	this->beginTransaction(this->_SSPIsettings);
-	delayNanoseconds(100);				// wait (~SYNC LOW -> SCLK edge)
+	delayNanoseconds(100);					// wait (~SYNC LOW -> SCLK edge)
 	this->transfer(cmd);            		// Send 8 bits
 	this->endTransaction();
 	delayNanoseconds(100);
