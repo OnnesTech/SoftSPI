@@ -81,6 +81,17 @@ SoftSPI::SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync, SoftSPI
 }
 
 /***************************************************************************//**
+* @brief Sets the correct pin configuration for SPI transfer		
+*******************************************************************************/
+void SoftSPI::pinSetup() 
+{
+    pinMode(_mosi, OUTPUT);
+    pinMode(_miso, INPUT);
+    pinMode(_sclk, OUTPUT);
+	pinMode(_sync, OUTPUT);
+}
+
+/***************************************************************************//**
 * @brief Uses default settings for beginTransaction()			
 *******************************************************************************/
 void SoftSPI::beginTransaction()
@@ -89,23 +100,17 @@ void SoftSPI::beginTransaction()
 }
 
 /***************************************************************************//**
-* @brief Sets the correct pin configuration for SPI transfer and the
-*        frequency, bitOrder, and dataMode.			
+* @brief Sets the correct frequency, bitOrder, and dataMode for the SPI transfer.			
 *******************************************************************************/
 void SoftSPI::beginTransaction(SoftSPISettings settings) 
-{
-    pinMode(_mosi, OUTPUT);
-    pinMode(_miso, INPUT);
-    pinMode(_sclk, OUTPUT);
-	pinMode(_sync, OUTPUT);
-	
+{	
 	this->setFreq(settings.clock);
 	this->setBitOrder(settings.bitOrder);
 	this->setDataMode(settings.dataMode);
 }
 
 /***************************************************************************//**
-* @brief Resets SPI pins to INPUT state
+* @brief Resets SPI pins to INPUT state (default)
 *******************************************************************************/
 void SoftSPI::endTransaction() 
 {
@@ -210,7 +215,6 @@ void SoftSPI::send(uint8_t cmd)
 	this->beginTransaction(this->_SSPIsettings);
 	delayNanoseconds(100);					// wait (~SYNC LOW -> SCLK edge)
 	this->transfer(cmd);            		// Send 8 bits
-	this->endTransaction();
 	delayNanoseconds(100);
 	digitalWriteFast(this->_sync, HIGH);	// Update input reg. (Rising Edge)
 }

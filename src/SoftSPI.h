@@ -76,6 +76,7 @@ class SoftSPI
 	public:
 		SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync): SoftSPI(mosi, miso, sclk, sync, _SSPI_default_settings) {} //delegation
         SoftSPI(uint8_t mosi, uint8_t miso, uint8_t sclk, uint8_t sync, SoftSPISettings settings);
+		void pinSetup();
         void beginTransaction();
 		void beginTransaction(SoftSPISettings settings);
         void endTransaction();
